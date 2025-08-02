@@ -1,43 +1,17 @@
-app.post('/api/register', async (req, res) => {
-  const { username, password, ref } = req.body;
+const express = require('express');
+const app = express();
+const db = require('./db');
+const authRoutes = require('./auth'); // مسیر ثبت‌نام
 
-  if (!username || !password || !ref) {
-    return res.status(400).send('همه فیلدها الزامی هستند.');
-  }
+app.use(express.json());
+app.use('/api', authRoutes); // استفاده از مسیر auth
 
-  // بررسی موجود بودن کاربر
-  const existingUser = await db.get('users').findOne({ username });
-  if (existingUser) {
-    return res.status(400).send('این نام کاربری قبلاً ثبت شده است.');
-  }
+app.get('/', (req, res) => {
+  res.send('YASA SMART PRO API is running.');
+});
 
-  // بررسی وجود معرف
-  const refUser = await db.get('users').findOne({ username: ref });
-  if (!refUser) {
-    return res.status(400).send('کد معرف نامعتبر است.');
-  }
-
-  // ثبت کاربر جدید
-  const newUser = {
-    username,
-    password,
-    ref,
-    balance: 0,
-    invest: 20,
-    left: null,
-    right: null,
-    createdAt: new Date()
-  };
-  await db.get('users').insert(newUser);
-
-  // اتصال به ساختار باینری معرف
-  if (!refUser.left) {
-    await db.get('users').update({ username: ref }, { $set: { left: username } });
-  } else if (!refUser.right) {
-    await db.get('users').update({ username: ref }, { $set: { right: username } });
-  } else {
-    // اگر هر دو پر بودن، فقط ثبت میشه ولی تو ساختار باینری قرار نمی‌گیره
-  }
-
-  return res.send('ثبت‌نام با موفقیت انجام شد.');
+// اگر پورت از env نیومد، روی 3000 بالا بیاد
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
