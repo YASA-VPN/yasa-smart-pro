@@ -1,49 +1,52 @@
-// register.js
-import db from './db.js'
-import express from 'express'
+app.post('/api/register', async (req, res) => {
+  const { username, password, ref } = req.body;
 
-const router = express.Router()
-
-function generateId() {
-  return Math.random().toString(36).substring(2, 10)
-}
-
-router.post('/register', async (req, res) => {
-  const { name, referrerId } = req.body
-
-  if (!name || !referrerId) {
-    return res.status(400).json({ error: 'نام و کد معرف الزامی است.' })
+  if (!username || !password || !ref) {
+    return res.status(400).send('همه فیلدها الزامی هستند.');
   }
 
-  await db.read()
-
-  const referrer = db.data.users.find(u => u.id === referrerId)
-
-  if (!referrer) {
-    return res.status(400).json({ error: 'کد معرف نامعتبر است.' })
+  // چک تکراری بودن
+  const existingUser = await db.get('users').findOne({ username });
+  if (existingUser) {
+    return res.status(400).send('این نام کاربری قبلاً ثبت شده است.');
   }
 
-  const side = (referrer.left && referrer.right) ? null :
-               (!referrer.left ? 'left' : 'right')
-
-  if (!side) {
-    return res.status(400).json({ error: 'این معرف ظرفیت ندارد.' })
+  // چک وجود معرف
+  const refUser = await db.get('users').findOne({ username: ref });
+  if (!refUser) {
+    return res.status(400).send('کد معرف نامعتبر است.');
   }
 
+  // اگه چپ و راست معرف پر باشن، ثبت‌نام غیرممکن
+  if (refUser.left && refUser.right && ref !== 'admin') {
+    return res.status(400).send('این معرف ظرفیتش تکمیل شده.');
+  }
+
+  // ثبت کاربر جدید
   const newUser = {
-    id: generateId(),
-    name,
-    referrerId,
+    username,
+    password,
+    ref,
+    balance: 0,
+    invest: 20,
     left: null,
-    right: null
+    right: null,
+    createdAt: new Date()
+  };
+  await db.get('users').insert(newUser);
+
+  // اتصال به چپ یا راست معرف
+  if (!refUser.left) {
+    await db.get('users').update({ username: ref }, { $set: { left: username } });
+  } else if (!refUser.right) {
+    await db.get('users').update({ username: ref }, { $set: { right: username } });
   }
 
-  db.data.users.push(newUser)
-  referrer[side] = newUser.id
+  // بررسی وجود جفت برای معرف
+  const updatedRef = await db.get('users').findOne({ username: ref });
+  if (updatedRef.left && updatedRef.right) {
+    await db.get('users').update({ username: ref }, { $inc: { balance: 6 } });
+  }
 
-  await db.write()
-
-  res.json({ success: true, userId: newUser.id, side })
-})
-
-export default router
+  return res.send('ثبت‌نام با موفقیت انجام شد.');
+});
