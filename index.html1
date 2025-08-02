@@ -1,11 +1,27 @@
 <!DOCTYPE html>
 <html lang="fa">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>YASA SMART PRO</title>
+  <style>
+    body {
+      font-family: Tahoma, sans-serif;
+      background-color: #1a1a2e;
+      color: #fcd34d;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    h1 {
+      text-align: center;
+      font-size: 2rem;
+    }
+  </style>
 </head>
 <body>
-  <h1>به YASA SMART PRO خوش آمدید</h1>
-  <p>پروژه سرمایه‌گذاری باینری</p>
+  <h1>✅ پروژه YASA SMART PRO با موفقیت راه‌اندازی شد</h1>
 </body>
 </html>
