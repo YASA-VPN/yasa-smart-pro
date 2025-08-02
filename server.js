@@ -1,17 +1,18 @@
 const express = require('express');
+const path = require('path');
+
 const app = express();
-const db = require('./db');
-const authRoutes = require('./auth'); // مسیر ثبت‌نام
+const PORT = process.env.PORT || 3000;
 
-app.use(express.json());
-app.use('/api', authRoutes); // استفاده از مسیر auth
+// تنظیم مسیر فایل‌های استاتیک
+app.use(express.static('views'));
 
+// روت اصلی (صفحه اول)
 app.get('/', (req, res) => {
-  res.send('YASA SMART PRO API is running.');
+  res.sendFile(path.join(__dirname, 'views', 'index.html'));
 });
 
-// اگر پورت از env نیومد، روی 3000 بالا بیاد
-const PORT = process.env.PORT || 3000;
+// اجرای سرور
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`YASA SMART PRO running on port ${PORT}`);
 });
