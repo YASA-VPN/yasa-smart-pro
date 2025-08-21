@@ -2,11 +2,13 @@
   "name": "yasa-smart-pro-api",
   "version": "1.0.0",
   "description": "YASA SMART PRO backend (Express API)",
-  "main": "index.js",
+  "main": "server.js",
   "type": "commonjs",
-  "engines": { "node": ">=18 <23" },
+  "engines": {
+    "node": ">=18 <23"
+  },
   "scripts": {
-    "start": "node index.js"
+    "start": "node server.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
