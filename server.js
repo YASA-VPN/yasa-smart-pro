@@ -1,4 +1,6 @@
-﻿const express = require("express");
+﻿// server.js — YASA SMART PRO backend API
+
+const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const crypto = require("crypto");
@@ -22,16 +24,21 @@ let teamStatsByAddress = {};
 // rotating security code every 10 min
 function rotatingCode() {
   const bucket = Math.floor(Date.now() / (10 * 60 * 1000));
-  const h = crypto.createHmac("sha256", process.env.ROTATE_SECRET || "secret")
+  const h = crypto
+    .createHmac("sha256", process.env.ROTATE_SECRET || "secret")
     .update(String(bucket))
     .digest("hex");
   return h.slice(0, 8).toUpperCase();
 }
 
 // daily payout simulation
-cron.schedule("0 0 * * *", () => {
-  console.log("[PAYOUT] Auto payout at 00:00 UTC (simulation)");
-}, { timezone: "UTC" });
+cron.schedule(
+  "0 0 * * *",
+  () => {
+    console.log("[PAYOUT] Auto payout at 00:00 UTC (simulation)");
+  },
+  { timezone: "UTC" }
+);
 
 // health check
 app.get("/healthz", (req, res) => {
@@ -40,7 +47,7 @@ app.get("/healthz", (req, res) => {
 
 // metrics endpoint
 app.get("/api/metrics", (req, res) => {
-  const daysOnline = Math.floor((Date.now() - startTimestamp) / 86400000);
+  const daysOnline = Math.floor((Date.now() - startTimestamp) / (1000 * 60 * 60 * 24));
   res.json({
     utc: new Date().toUTCString(),
     project_online_days: daysOnline,
@@ -67,7 +74,7 @@ app.get("/api/team/stats", (req, res) => {
   res.json(stats);
 });
 
-// register (demo)
+// register endpoint (demo)
 app.post("/api/register", (req, res) => {
   try {
     const sponsor = (req.body.sponsor || CREATOR_WALLET).toLowerCase();
@@ -90,7 +97,8 @@ app.post("/api/register", (req, res) => {
     }
     const s = teamStatsByAddress[sponsor];
     s.total += 1;
-    if (s.left <= s.right) s.left += 1; else s.right += 1;
+    if (s.left <= s.right) s.left += 1;
+    else s.right += 1;
 
     const txHash = "stub-" + crypto.randomBytes(8).toString("hex");
     res.json({ txHash, registered: true });
